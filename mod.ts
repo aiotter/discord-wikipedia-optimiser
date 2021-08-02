@@ -15,32 +15,31 @@ startBot({
       console.log("Successfully connected to gateway");
     },
 
-    messageCreate(message) {
+    async messageCreate(message) {
       if (message.isBot) return;
       const wikipediaTitles = getTitles(message.content);
       if (wikipediaTitles.length === 0) return;
-      fetchWikipediaData(wikipediaTitles)
-        .then((wikipediaData) =>
-          wikipediaData.map((datum) => {
-            return {
-              title: datum.title,
-              url: `https://ja.wikipedia.org/?curid=${datum.pageId}`,
-              description: datum.summary,
-              footer: { text: footer },
-              image: {url: datum.pageImageUrl},
-            };
-          })
-        )
-        .then((embeds) => message.reply({ embeds: embeds }, false))
-        .then(() =>
-          // FIXME: `message.edit` is not working now. Needs upstream bugfix.
-          // await message.edit({ flags: 4 }).catch(console.error);  // clear embeds
-          rest.runMethod(
-            "patch",
-            endpoints.CHANNEL_MESSAGE(message.channelId, message.id),
-            { flags: 4 }, // clear embeds
-          )
-        ).catch(console.error);
+
+      try {
+        const wikipediaData = await fetchWikipediaData(wikipediaTitles);
+        const embeds = wikipediaData.map((datum) => ({
+          title: datum.title,
+          url: `https://ja.wikipedia.org/?curid=${datum.pageId}`,
+          description: datum.summary,
+          footer: { text: footer },
+          image: { url: datum.pageImageUrl },
+        }));
+        await message.reply({ embeds: embeds }, false);
+        // FIXME: `message.edit` is not working now. Needs upstream bugfix.
+        // await message.edit({ flags: 4 }).catch(console.error);  // clear embeds
+        await rest.runMethod(
+          "patch",
+          endpoints.CHANNEL_MESSAGE(message.channelId, message.id),
+          { flags: 4 }, // clear embeds
+        );
+      } catch (error) {
+        console.error(error);
+      }
     },
   },
 });

@@ -8,7 +8,8 @@ export const wikipediaRegex = new RegExp(
   "https?://.*?ja\\.wikipedia\\.org/wiki/([^/\\s]+)(?!/)",
   "g",
 );
-const wikipediaApi = "https://ja.wikipedia.org/w/api.php?format=json&action=query&prop=extracts|pageimages&exintro&pithumbsize=300";
+const wikipediaApi =
+  "https://ja.wikipedia.org/w/api.php?format=json&action=query&prop=extracts|pageimages&exintro&pithumbsize=300";
 
 interface WikipediaRawData {
   query: {
@@ -39,25 +40,20 @@ export function getTitles(content: string) {
     .map((match) => match[1]);
 }
 
-export function fetchWikipediaData(titles: string[]) {
+function convertToMarkdown(html: string) {
+  const document = parser.parseFromString(html, "text/html");
+  return turndownService.turndown(document);
+}
+
+export async function fetchWikipediaData(titles: string[]) {
   const url = new URL(wikipediaApi);
   url.href += `&titles=${titles.join("|")}`;
-  return fetch(url)
-    .then((response) => response.json())
-    .then((json: WikipediaRawData) =>
-      Object.values(json.query.pages).map((rawDataFragment) => {
-        const document = parser.parseFromString(
-          rawDataFragment.extract,
-          "text/html",
-        );
-        const markdown = turndownService.turndown(document);
-
-        return {
-          pageId: rawDataFragment.pageid,
-          title: rawDataFragment.title.trim(),
-          summary: markdown.trim(),
-          pageImageUrl: rawDataFragment.thumbnail?.source ?? undefined,
-        } as WikipediaData;
-      })
-    );
+  const response = await fetch(url);
+  const json: WikipediaRawData = await response.json();
+  return Object.values(json.query.pages).map((rawDataFragment) => ({
+    pageId: rawDataFragment.pageid,
+    title: rawDataFragment.title.trim(),
+    summary: convertToMarkdown(rawDataFragment.extract).trim(),
+    pageImageUrl: rawDataFragment.thumbnail?.source ?? undefined,
+  } as WikipediaData));
 }
