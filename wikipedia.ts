@@ -8,9 +8,7 @@ export const wikipediaRegex = new RegExp(
   "https?://.*?ja\\.wikipedia\\.org/wiki/([^/\\s]+)(?!/)",
   "g",
 );
-const wikipediaApi = new URL(
-  "https://ja.wikipedia.org/w/api.php?format=json&action=query&prop=extracts|pageimages&exintro&pithumbsize=300",
-);
+const wikipediaApi = "https://ja.wikipedia.org/w/api.php?format=json&action=query&prop=extracts|pageimages&exintro&pithumbsize=300";
 
 interface WikipediaRawData {
   query: {
@@ -42,7 +40,7 @@ export function getTitles(content: string) {
 }
 
 export function fetchWikipediaData(titles: string[]) {
-  const url = wikipediaApi;
+  const url = new URL(wikipediaApi);
   url.href += `&titles=${titles.join("|")}`;
   return fetch(url)
     .then((response) => response.json())
