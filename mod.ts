@@ -18,7 +18,7 @@ startBot({
     messageCreate(message) {
       if (message.isBot) return;
       const wikipediaTitles = getTitles(message.content);
-      if (!wikipediaTitles) return;
+      if (wikipediaTitles.length === 0) return;
       fetchWikipediaData(wikipediaTitles)
         .then((wikipediaData) =>
           wikipediaData.map((datum) => {
