@@ -12,6 +12,14 @@ Deno.test("Get titles from string", () => {
   }]);
 });
 
+Deno.test("Convert mobile url to PC url", () => {
+  const titles = getTitles("https://ja.m.wikipedia.org/wiki/ユーラシアカワウソ");
+  assertEquals(titles, [{
+    title: "ユーラシアカワウソ",
+    url: "https://ja.wikipedia.org/wiki/ユーラシアカワウソ",
+  }]);
+});
+
 Deno.test("Fetch wikipedia data", async () => {
   const data = await fetchWikipediaData([{
     title: "ユーラシアカワウソ",

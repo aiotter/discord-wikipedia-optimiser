@@ -5,7 +5,7 @@ const parser = new DOMParser();
 const turndownService = new tds({});
 
 export const wikipediaRegex = new RegExp(
-  "https?://.*?ja\\.wikipedia\\.org/wiki/([^/\\s]+)(?!/)",
+  "https?://.*?ja\\.(m\\.)?wikipedia\\.org/wiki/([^/\\s]+)(?!/)",
   "g",
 );
 const wikipediaApi =
@@ -42,7 +42,10 @@ export interface TitleUrlPair {
 
 export function getTitles(content: string) {
   return Array.from(content.matchAll(wikipediaRegex))
-    .map((match) => ({ title: match[1], url: match[0] }));
+    .map((match) => ({
+      title: match[2],
+      url: `https://ja.wikipedia.org/wiki/${match[2]}`,
+    }));
 }
 
 function convertToMarkdown(html: string) {
