@@ -6,11 +6,17 @@ import {
 
 Deno.test("Get titles from string", () => {
   const titles = getTitles("https://ja.wikipedia.org/wiki/ユーラシアカワウソ");
-  assertEquals(titles, ["ユーラシアカワウソ"]);
+  assertEquals(titles, [{
+    title: "ユーラシアカワウソ",
+    url: "https://ja.wikipedia.org/wiki/ユーラシアカワウソ",
+  }]);
 });
 
 Deno.test("Fetch wikipedia data", async () => {
-  const data = await fetchWikipediaData(["ユーラシアカワウソ"])
+  const data = await fetchWikipediaData([{
+    title: "ユーラシアカワウソ",
+    url: "https://ja.wikipedia.org/wiki/ユーラシアカワウソ",
+  }])
     .then((array) => array.pop());
   assert(data);
   assertEquals(data.pageId, 944167);

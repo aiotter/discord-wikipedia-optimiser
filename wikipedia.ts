@@ -35,9 +35,14 @@ export interface WikipediaData {
   pageImageUrl?: string;
 }
 
+export interface TitleUrlPair {
+  title: string;
+  url: string;
+}
+
 export function getTitles(content: string) {
   return Array.from(content.matchAll(wikipediaRegex))
-    .map((match) => match[1]);
+    .map((match) => ({ title: match[1], url: match[0] }));
 }
 
 function convertToMarkdown(html: string) {
@@ -45,9 +50,9 @@ function convertToMarkdown(html: string) {
   return turndownService.turndown(document);
 }
 
-export async function fetchWikipediaData(titles: string[]) {
+export async function fetchWikipediaData(titles: TitleUrlPair[]) {
   const url = new URL(wikipediaApi);
-  url.href += `&titles=${titles.join("|")}`;
+  url.href += `&titles=${titles.map((pair) => pair.title).join("|")}`;
   const response = await fetch(url);
   const json: WikipediaRawData = await response.json();
   return Object.values(json.query.pages).map((rawDataFragment) => ({

@@ -29,7 +29,12 @@ startBot({
           footer: { text: footer },
           image: { url: datum.pageImageUrl },
         }));
+
+        // if embeds has only one item, the url can be specified; so use it instead.
+        if (embeds.length === 1) embeds[0].url = wikipediaTitles[0].url;
+
         await message.reply({ embeds: embeds }, false);
+
         // FIXME: `message.edit` is not working now. Needs upstream bugfix.
         // await message.edit({ flags: 4 }).catch(console.error);  // clear embeds
         await rest.runMethod(
